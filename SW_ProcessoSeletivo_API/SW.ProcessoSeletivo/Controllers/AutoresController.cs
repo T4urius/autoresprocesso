@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SW.ProcessoSeletivo.Domain.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,11 @@ namespace SW.ProcessoSeletivo.Controllers
     [Route("api/v1/autores")]
     public class AutoresController : ControllerBase
     {
-        public AutoresController()
-        {
+        private readonly IAutorRepository _autorRepository;
 
+        public AutoresController(IAutorRepository autorRepository)
+        {
+            _autorRepository = autorRepository;
         }
 
         [HttpPost]
@@ -64,6 +67,32 @@ namespace SW.ProcessoSeletivo.Controllers
                 }
             }
             return Ok(nomeAutores);
+        }
+
+        [HttpPost("inserirAutor")]
+        public async Task<IActionResult> InserirAutor([FromBody] AutoresRequest request)
+        {
+            var response = _autorRepository.InserirAutor(request);
+
+            if (response)
+            {
+                return BadRequest();
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeletarAutor([FromQuery] int idAutor)
+        {
+            var response = _autorRepository.DeletarAutor(idAutor);
+
+            if (response)
+            {
+                return BadRequest();
+            }
+
+            return NoContent();
         }
     }
 }
