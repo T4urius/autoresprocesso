@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using SW.ProcessoSeletivo.CrossCutting.IoC;
 using SW.ProcessoSeletivo.Repository.Data;
-using Swashbuckle.AspNetCore.Swagger;
+using AutoMapper;
+using SW.ProcessoSeletivo.Domain.Contracts.Repositories;
+using SW.ProcessoSeletivo.Repository.Repositories;
 
 namespace SW.ProcessoSeletivo
 {
@@ -34,20 +28,28 @@ namespace SW.ProcessoSeletivo
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            services.AddAutoMapper();
+
+            services.AddDbContext<SWAutoresDataContext>(opt => opt.UseSqlServer(_configuration.GetConnectionString("SQLConnection")));
+
+            services.AddTransient<IAutorRepository, AutorRepository>();
+
             services.AddSwaggerGen(e =>
             {
                 e.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
             });
 
+            services.AddCors();
+
             services.AddDbContext<SWAutoresDataContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
-            services.AddRegisterIoCServices(_configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+
             app.UseSwagger();
 
             app.UseSwaggerUI(e =>

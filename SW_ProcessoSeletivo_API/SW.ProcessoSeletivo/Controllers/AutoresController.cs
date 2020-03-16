@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using SW.ProcessoSeletivo.Domain.Contracts.Repositories;
 using SW.ProcessoSeletivo.Domain.DTOs;
+using SW.ProcessoSeletivo.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,20 +14,31 @@ namespace SW.ProcessoSeletivo.Controllers
     public class AutoresController : ControllerBase
     {
         private readonly IAutorRepository _autorRepository;
+        private readonly IMapper _mapper;
 
-        public AutoresController(IAutorRepository autorRepository)
+        public AutoresController(IAutorRepository autorRepository, IMapper mapper)
         {
             _autorRepository = autorRepository;
+            _mapper = mapper;
         }
 
-        [HttpPost]
-        public IActionResult FormatarAutores([FromBody] List<string> autores)
+        //[HttpGet]
+        //public async Task<IActionResult> ObterAutores()
+        //{
+        //    var response = await _autorRepository.ObterAutores();
+        //    return Ok(response);
+        //}
+
+        [HttpGet]
+        public async Task<IActionResult> FormatarAutores()
         {
+            var response = await _autorRepository.ObterAutores();
+
             var nomeAutores = new List<string>();
 
-            foreach (var nome in autores)
+            foreach (var nome in response)
             {
-                var result = nome.ToString().Split(" ");
+                var result = nome.Nome.Split(" ");
 
                 for (var j = 0; j < result.Length; j++)
                 {
@@ -72,27 +86,18 @@ namespace SW.ProcessoSeletivo.Controllers
         [HttpPost("inserirAutor")]
         public async Task<IActionResult> InserirAutor([FromBody] AutoresRequest request)
         {
-            var response = _autorRepository.InserirAutor(request);
+            var data = _mapper.Map<Autores>(request);
+            var response = await _autorRepository.InserirAutor(data);
 
-            if (response)
-            {
-                return BadRequest();
-            }
-
-            return NoContent();
+            return Ok(response);
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeletarAutor([FromQuery] int idAutor)
         {
-            var response = _autorRepository.DeletarAutor(idAutor);
+            var response = _autorRepository.DeleteAutor(idAutor);
 
-            if (response)
-            {
-                return BadRequest();
-            }
-
-            return NoContent();
+            return Ok(response);
         }
     }
 }

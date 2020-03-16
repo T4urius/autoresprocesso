@@ -1,11 +1,14 @@
 ﻿using SW.ProcessoSeletivo.Domain.DTOs;
 using SW.ProcessoSeletivo.Domain.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SW.ProcessoSeletivo.Domain.Contracts.Repositories
 {
     public interface IAutorRepository
     {
-        void DeleteAutor(int idAutor);
-        void InserirAutor(AutoresRequest request);
+        Task<Autores> DeleteAutor(int idAutor);
+        Task<List<Autores>> ObterAutores();
+        Task<Autores> InserirAutor(Autores autores);
     }
 }
